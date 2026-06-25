@@ -4,7 +4,8 @@
       { "hooks": [ { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-inject.mjs\"", "timeout": 30 } ] }
     ],
     "Stop": [
-      { "hooks": [ { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/doctor.mjs\"", "timeout": 30 } ] }
+      { "hooks": [ { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/doctor.mjs\"", "timeout": 30 } ] },
+      { "hooks": [ { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/stop-checks.mjs\"", "timeout": 60 } ] }
     ],
     "PreToolUse": [
       { "matcher": "Edit|Write", "hooks": [ { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-runner.mjs\"", "timeout": 30 } ] }
