@@ -22,3 +22,13 @@ test('忽略外链、锚点、模板占位符', () => {
   const errs = findDeadLinks([join(root, 'docs', 'a.md')], root);
   assert.equal(errs.length, 0);
 });
+
+test('代码块内的示例链接不算死链；块外的真链接照常检测', () => {
+  const root = mkdtempSync(join(tmpdir(), 'dl-'));
+  mkdirSync(join(root, 'docs'), { recursive: true });
+  writeFileSync(join(root, 'docs', 'a.md'),
+    '块外 [真死链](./gone.md)\n\n```\n示例 [B](./b.md) [C](./c.md)\n```\n');
+  const errs = findDeadLinks([join(root, 'docs', 'a.md')], root);
+  assert.equal(errs.length, 1);
+  assert.match(errs[0], /gone\.md/);
+});
