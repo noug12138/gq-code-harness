@@ -45,3 +45,8 @@ test('block:true 但已 override → 放行（exit 0），消耗一次', () => {
   const r = run(setup(blockCk, { 'A.java': 'BAD' }, ['B']));
   assert.equal(r.code, 0);
 });
+
+test('block:true 一个 id 多处违反 + override 一次 → 全放行（exit 0）', () => {
+  const r = run(setup(blockCk, { 'A.java': 'BAD', 'B.java': 'BAD' }, ['B']));
+  assert.equal(r.code, 0);
+});

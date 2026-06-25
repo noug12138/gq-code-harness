@@ -32,3 +32,10 @@ test('无检查 / 空检查 → 空数组', () => {
   const root = mkdtempSync(join(tmpdir(), 'sp-'));
   assert.deepEqual(scanProject(root, []), []);
 });
+
+test('跳过超大文件（>512KB，多为二进制）', () => {
+  const root = mkdtempSync(join(tmpdir(), 'sp-'));
+  mkdirSync(join(root, 'src'), { recursive: true });
+  writeFileSync(join(root, 'src', 'Big.java'), 'System.out.println(x);' + 'x'.repeat(600 * 1024));
+  assert.equal(scanProject(root, ck).length, 0);
+});
