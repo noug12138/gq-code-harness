@@ -25,7 +25,7 @@ try {
   if (tool === 'Write') { filePath = ti.file_path; content = ti.content; }
   else if (tool === 'Edit') { filePath = ti.file_path; content = ti.new_string; }
   else allow();
-  if (!filePath || content == null) allow();
+  if (!filePath || content == null) allow(); // 仅缺字段(null/undefined)放行；空串 "" 仍进检查（require 视空内容为违反，符合预期）
 
   const root = projectRoot();
   for (const c of loadChecks(root)) {

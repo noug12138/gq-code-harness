@@ -19,5 +19,5 @@ test('ids 含该 id → 已放行；consume 后移除并留痕', () => {
   assert.equal(isOverridden(r, 'A'), false);   // 已消耗
   assert.equal(isOverridden(r, 'B'), true);     // 其它保留
   const o = JSON.parse(readFileSync(join(r, '.ai', '.harness-override.json'), 'utf8'));
-  assert.equal(o.consumed.some((x) => x.id === 'A'), true); // 留痕
+  assert.equal(o.log.some((x) => x.id === 'A' && x.action === 'consume'), true); // 留痕统一在 log
 });
