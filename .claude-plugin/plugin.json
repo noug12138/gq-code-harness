@@ -1,0 +1,6 @@
+{
+  "name": "gq-code-harness",
+  "version": "0.1.0",
+  "description": "AI 自我进化引擎：踩过的坑变成硬性检查，hook 在真实改动上拦截（地基版：会话注入 + 死链检查）",
+  "author": { "name": "lidanyang" }
+}

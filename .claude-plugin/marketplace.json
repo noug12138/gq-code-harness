@@ -1,0 +1,7 @@
+{
+  "name": "gq-harness-marketplace",
+  "owner": { "name": "lidanyang" },
+  "plugins": [
+    { "name": "gq-code-harness", "source": "./" }
+  ]
+}
