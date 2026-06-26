@@ -21,6 +21,7 @@ test('复制骨架：新文件创建、内容一致', () => {
   assert.equal(readFileSync(join(t, 'docs', 'harness', 'checks.json'), 'utf8'), '[]');
   assert.ok(r.created.includes(join('docs', 'index.md')));
   assert.equal(r.skipped.length, 0);
+  assert.equal(r.created.length, 2);
 });
 
 test('已存在的文件不覆盖、计入 skipped', () => {
