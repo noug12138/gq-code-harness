@@ -78,3 +78,17 @@ test('已 override 的做完没收 → 放行(exit 0) 且消耗 override', () =>
   const o = JSON.parse(readFileSync(join(r2, '.ai', '.harness-override.json'), 'utf8'));
   assert.equal(o.ids.includes('2026-06-26-done.md'), false);
 });
+
+test('代码违反 + 做完没收 同时 → exit 2，两段都在', () => {
+  const root = mkdtempSync(join(tmpdir(), 'sc-'));
+  mkdirSync(join(root, 'docs', 'harness'), { recursive: true });
+  writeFileSync(join(root, 'docs', 'harness', 'checks.json'), JSON.stringify(blockCk));
+  mkdirSync(join(root, 'src'), { recursive: true });
+  writeFileSync(join(root, 'src', 'A.java'), 'BAD');
+  mkdirSync(join(root, '.ai', 'tasks'), { recursive: true });
+  writeFileSync(join(root, '.ai', 'tasks', '2026-06-26-combo.md'), '---\nstatus: active\ntitle: 合并测试\n---\n- [x] 一\n');
+  const { code, err: stderr } = run(root);
+  assert.equal(code, 2);
+  assert.match(stderr, /违反硬性检查/);
+  assert.match(stderr, /做完没收/);
+});

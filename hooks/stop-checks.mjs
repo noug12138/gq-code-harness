@@ -41,7 +41,7 @@ try {
     }
     if (staleBlocking.length) {
       msg += `[做完没收 ${staleBlocking.length} 个]——以下任务步骤已全勾但 status 仍 active，请逐个执行 /gq-code-harness:archive <文件名> 收口（翻 status=done）；若实为未完成补一条未勾步骤；确属待外部验收由用户 /gq-code-harness:override <文件名> "理由"：\n` +
-        cap(staleBlocking.map((t) => `   - ${t.title}（${t.file}）`)).join('\n');
+        cap(staleBlocking.map((t) => `   - ${t.title}（${t.file}）`)).join('\n') + '\n';
     }
     process.stderr.write(msg);
     process.exit(2);
