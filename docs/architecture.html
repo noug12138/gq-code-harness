@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: 1344px 1180px; margin: 0; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 28px 32px; width: 1280px; background: #ffffff;
+         font-family: "Microsoft YaHei", "Segoe UI", system-ui, sans-serif; color: #0f172a; }
+  h1 { font-size: 26px; margin: 0 0 2px; }
+  .sub { color: #64748b; font-size: 14px; margin: 0 0 20px; }
+  .lane { border-left: 5px solid #cbd5e1; padding: 10px 0 10px 16px; margin: 0 0 16px; }
+  .lane > .t { font-size: 17px; font-weight: 700; margin: 0 0 10px; }
+  .lane > .t small { font-weight: 400; color: #64748b; font-size: 13px; }
+  .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 7px 6px; }
+  .box { border-radius: 9px; padding: 7px 11px; font-size: 13px; line-height: 1.35;
+         border: 1.5px solid; max-width: 250px; }
+  .box b { display:block; font-size: 13px; }
+  .box span { color:#475569; font-size: 11.5px; }
+  .arr { color: #94a3b8; font-size: 18px; font-weight: 700; }
+  .hook  { background:#dbeafe; border-color:#3b82f6; }
+  .cmd   { background:#dcfce7; border-color:#22c55e; }
+  .check { background:#fee2e2; border-color:#ef4444; }
+  .agent { background:#f3e8ff; border-color:#a855f7; }
+  .data  { background:#f1f5f9; border-color:#94a3b8; }
+  .note  { background:#fef3c7; border-color:#f59e0b; color:#78350f; font-size:12px; }
+  .split { display:flex; gap:14px; }
+  .col { flex:1; border:1.5px solid; border-radius:11px; padding:12px 14px; }
+  .col.mech { background:#eff6ff; border-color:#3b82f6; }
+  .col.cont { background:#f8fafc; border-color:#94a3b8; }
+  .col h3 { margin:0 0 6px; font-size:15px; }
+  .col .chips { display:flex; flex-wrap:wrap; gap:6px; }
+  .chip { font-size:12px; background:#fff; border:1px solid #cbd5e1; border-radius:6px; padding:3px 7px; }
+  .cap { color:#64748b; font-size:12.5px; margin:7px 0 0; }
+  .legend { display:flex; gap:14px; flex-wrap:wrap; margin-top:6px; font-size:12px; color:#475569; }
+  .legend i { display:inline-block; width:12px; height:12px; border-radius:3px; border:1.5px solid; margin-right:5px; vertical-align:-1px; }
+</style>
+</head>
+<body>
+  <h1>gq-code-harness — 架构与流程</h1>
+  <p class="sub">AI 自我进化引擎：踩过的坑变成机器能跑的检查，hook 在真实改动上硬拦——硬强制、不靠 AI 自觉。 &nbsp;|&nbsp; 跨平台 Node 插件 · v0.6.0</p>
+
+  <div class="split" style="margin-bottom:18px">
+    <div class="col mech">
+      <h3>🔧 插件 = 机制（装一次 · 可复用 · 跨平台 · 自带 git/CI）</h3>
+      <div class="chips">
+        <span class="chip">Hooks: session-inject · check-runner · doctor · stop-checks · gen-index</span>
+        <span class="chip">Commands: init · new-task · archive · distill · contract · override</span>
+        <span class="chip">Skill: harness-lifecycle</span>
+        <span class="chip">Workflow: init-bootstrap（多 agent）</span>
+        <span class="chip">lib/ · bin/ · assets/</span>
+      </div>
+    </div>
+    <div class="col cont">
+      <h3>📦 项目 = 内容（每个项目各一份 · 不进插件）</h3>
+      <div class="chips">
+        <span class="chip">docs/ 长期知识</span>
+        <span class="chip">docs/harness/checks.json（弹药：可跑检查）</span>
+        <span class="chip">.ai/ 任务与会话</span>
+        <span class="chip">CLAUDE.md 路由</span>
+      </div>
+      <p class="cap">插件不碰业务，只在项目内容上"跑检查 · 拦截 · 注入 · 起草"。</p>
+    </div>
+  </div>
+
+  <div class="lane" style="border-color:#3b82f6">
+    <div class="t">① 会话生命周期 <small>—— 钩子时间线（Claude Code 直接执行）</small></div>
+    <div class="flow">
+      <div class="box data"><b>SessionStart</b></div>
+      <span class="arr">→</span>
+      <div class="box hook"><b>session-inject</b><span>注入 .ai/session.md，快速续上</span></div>
+      <span class="arr">→</span>
+      <div class="box data"><b>干活中 · Edit/Write</b></div>
+      <span class="arr">→</span>
+      <div class="box hook"><b>check-runner · PreToolUse</b><span>对"将写入的内容"跑快检查</span></div>
+      <span class="arr">→</span>
+      <div class="box check"><b>命中检查 → DENY 硬拦</b><span>改不进去；否则放行</span></div>
+      <span class="arr">→</span>
+      <div class="box data"><b>收工 · Stop</b></div>
+      <span class="arr">→</span>
+      <div class="box hook"><b>doctor</b><span>死链一致性 · 报告</span></div>
+      <div class="box hook"><b>stop-checks</b><span>慢检查 + 做完没收 → exit 2 拦</span></div>
+      <div class="box hook"><b>gen-index</b><span>按真实文件重算带标记索引</span></div>
+    </div>
+  </div>
+
+  <div class="lane" style="border-color:#ef4444">
+    <div class="t">② 自我进化闭环 <small>—— 核心：坑 → 可跑检查 → 硬拦 → 不复发</small></div>
+    <div class="flow">
+      <div class="box data"><b>踩坑（三种硬信号）</b><span>① 已有检查没过 ② 用户当场纠正 ③ 编译/测试失败</span></div>
+      <span class="arr">→</span>
+      <div class="box cmd"><b>/contract</b><span>带你写出可跑检查，坏例必抓 ✓ 好例不伤 ✓</span></div>
+      <span class="arr">→</span>
+      <div class="box data"><b>checks.json</b><span>这个坑的"弹药"</span></div>
+      <span class="arr">→</span>
+      <div class="box check"><b>引擎执行</b><span>PreToolUse 硬拦 + Stop gate</span></div>
+      <span class="arr">→</span>
+      <div class="box note"><b>同坑不可能再靠"忘了"复发</b><span>每犯一次没见过的错，系统多长一颗牙 ↺ 新坑回到起点</span></div>
+    </div>
+    <p class="cap">安全阀：<b>/override</b>（只有用户能运行，AI 不能自我放行，留痕） · 任何 hook 异常 <b>fail-open</b>（放行 + 报错，绝不锁死）。</p>
+  </div>
+
+  <div class="lane" style="border-color:#22c55e">
+    <div class="t">③ 任务生命周期 <small>—— 单文件 + status 字段；归档=翻字段、不搬目录</small></div>
+    <div class="flow">
+      <div class="box cmd"><b>/new-task</b></div>
+      <span class="arr">→</span>
+      <div class="box data"><b>.ai/tasks/&lt;date&gt;-x.md</b><span>status: active</span></div>
+      <span class="arr">→</span>
+      <div class="box data"><b>干活 · 勾步骤</b></div>
+      <span class="arr">→</span>
+      <div class="box check"><b>步骤全勾但仍 active → stop-checks exit 2 拦</b><span>"做完没收"</span></div>
+      <span class="arr">→</span>
+      <div class="box agent"><b>agent 自己 /archive</b><span>status→done，文件原地不动</span></div>
+      <span class="arr">→</span>
+      <div class="box cmd"><b>/distill</b><span>长期结论沉淀进 docs/</span></div>
+    </div>
+    <p class="cap">防退化靠机器把关、agent 自维护——不靠"记得归档"。</p>
+  </div>
+
+  <div class="lane" style="border-color:#a855f7">
+    <div class="t">④ /init 多 agent 铺底 <small>—— 一键给新项目铺底（确定性 JS 编排 + subagent 扇出）</small></div>
+    <div class="flow">
+      <div class="box cmd"><b>/init</b></div>
+      <span class="arr">→</span>
+      <div class="box data"><b>铺骨架 + 探测子系统</b><span>scaffold assets · 10–16 个单元</span></div>
+      <span class="arr">→</span>
+      <div class="box agent"><b>并行测绘 agents（扇出）</b><span>各读一个子系统，只回压缩小结，重读留各自即弃上下文</span></div>
+      <span class="arr">→</span>
+      <div class="box agent"><b>critic 自检查漏</b><span>绕回补扫，保护上限 ≤2 轮</span></div>
+      <span class="arr">→</span>
+      <div class="box agent"><b>writer 起草落盘</b><span>全标"机器起草·待人审"</span></div>
+      <span class="arr">→</span>
+      <div class="box note"><b>汇总 ≤7 问题 → 一次性问你</b></div>
+    </div>
+    <p class="cap">编排器是确定性 JS（<b>不碰文件系统</b>）：读由测绘 agent、写由 writer agent，编排只倒腾压缩小结 → 主上下文不爆。扇出是为"规模/独立"，<b>不是</b>角色扮演（PM/前端/后端…）。</p>
+  </div>
+
+  <div class="legend">
+    <span><i style="background:#dbeafe;border-color:#3b82f6"></i>钩子</span>
+    <span><i style="background:#dcfce7;border-color:#22c55e"></i>命令</span>
+    <span><i style="background:#fee2e2;border-color:#ef4444"></i>检查 · 拦截</span>
+    <span><i style="background:#f3e8ff;border-color:#a855f7"></i>agent</span>
+    <span><i style="background:#f1f5f9;border-color:#94a3b8"></i>数据 · 状态</span>
+    <span><i style="background:#fef3c7;border-color:#f59e0b"></i>说明 · 安全阀</span>
+  </div>
+</body>
+</html>
