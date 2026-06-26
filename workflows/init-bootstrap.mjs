@@ -13,6 +13,7 @@ const units = (args && args.units) || [];
 
 const SURVEY_SCHEMA = {
   type: 'object',
+  additionalProperties: false,
   required: ['name', 'techStack', 'keyModules', 'dataFlows', 'entryPoints', 'candidateContracts', 'openQuestions'],
   properties: {
     name: { type: 'string' },
@@ -27,6 +28,7 @@ const SURVEY_SCHEMA = {
 
 const CRITIC_SCHEMA = {
   type: 'object',
+  additionalProperties: false,
   required: ['gaps', 'looksGuessed'],
   properties: {
     gaps: { type: 'array', items: { type: 'object', required: ['unit', 'what'], properties: { unit: { type: 'string' }, what: { type: 'string' } } } },
@@ -44,23 +46,30 @@ function surveyPrompt(u, extra) {
 - entryPoints：对外入口（接口/页面/任务，≤8）
 - candidateContracts：值得固化的"坑/约定"候选（≤5，每条一句）
 - openQuestions：读不懂、需人确认的问题（≤3；没有就空数组）
+- name 字段请原样回 "${u.name}"
 ${extra || ''}`;
 }
 
 phase('Survey');
 let surveys = (await parallel(units.map((u) => () =>
   agent(surveyPrompt(u), { label: `survey:${u.name}`, phase: 'Survey', schema: SURVEY_SCHEMA })
+    .then((r) => (r ? { ...r, name: u.name } : null))
 ))).filter(Boolean);
 
 phase('Self-check');
 let round = 0;
+let looksGuessed = [];
 while (round < 2) { // §13 授权的保护上限
   const critic = await agent(
-    `你是审查者。下面是各子系统测绘小结的 JSON 数组。指出：哪些子系统信息有缺口(gaps：{unit,what})、哪些结论像猜的(looksGuessed)。只回 JSON。\n` +
-    JSON.stringify(surveys),
+    `你是审查者。下面是各子系统测绘小结的 JSON 数组。指出：
+- gaps：需要补扫的子系统（信息有缺口、或结论像在猜，且能定位到具体子系统），格式 {unit, what}；
+- looksGuessed：定位不到具体子系统的整体存疑（仅提示，会并入待问，不触发补扫）。
+只回 JSON。\n` + JSON.stringify(surveys),
     { label: `critic:r${round + 1}`, phase: 'Self-check', schema: CRITIC_SCHEMA }
   );
-  if (!critic || (critic.gaps.length === 0 && critic.looksGuessed.length === 0)) break;
+  if (!critic) break;
+  looksGuessed = critic.looksGuessed || [];
+  if (!critic.gaps || critic.gaps.length === 0) break;
   const names = [...new Set(critic.gaps.map((g) => g.unit))];
   const gapUnits = names.map((n) => units.find((u) => u.name === n)).filter(Boolean);
   if (gapUnits.length === 0) break;
@@ -68,13 +77,14 @@ while (round < 2) { // §13 授权的保护上限
   const redo = (await parallel(gapUnits.map((u) => () =>
     agent(surveyPrompt(u, `上一轮被指出有缺口/像猜，重点补全：` + critic.gaps.filter((g) => g.unit === u.name).map((g) => g.what).join('；')),
       { label: `resurvey:${u.name}`, phase: 'Self-check', schema: SURVEY_SCHEMA })
+      .then((r) => (r ? { ...r, name: u.name } : null))
   ))).filter(Boolean);
   for (const r of redo) { const i = surveys.findIndex((s) => s.name === r.name); if (i >= 0) surveys[i] = r; else surveys.push(r); }
   round++;
 }
 
-// 汇总待问：去重 + 压到 ≤7（纯 JS，编排器内存里做）
-const questions = [...new Set(surveys.flatMap((s) => s.openQuestions || []))].slice(0, 7);
+// 汇总待问：survey 的 openQuestions + critic 整体存疑，去重 + 压到 ≤7（纯 JS）
+const questions = [...new Set([...surveys.flatMap((s) => s.openQuestions || []), ...looksGuessed])].slice(0, 7);
 
 phase('Draft');
 const draft = await agent(
@@ -83,7 +93,7 @@ const draft = await agent(
 2. 候选契约：把各 candidateContracts 汇成一节，追加到上面 module-map.md 末尾的「候选防复发契约（待定）」段（不要直接建 Cxxx，避免臆造编号）。
 拿不准/缺口的内容放进文档「待确认」段，不要编业务规则。写完只回 JSON：{filesWritten:[相对项目根的路径...]}。
 小结 JSON：\n` + JSON.stringify(surveys),
-  { label: 'draft-writer', phase: 'Draft', schema: { type: 'object', required: ['filesWritten'], properties: { filesWritten: { type: 'array', items: { type: 'string' } } } } }
+  { label: 'draft-writer', phase: 'Draft', schema: { type: 'object', additionalProperties: false, required: ['filesWritten'], properties: { filesWritten: { type: 'array', items: { type: 'string' } } } } }
 );
 
 return {
