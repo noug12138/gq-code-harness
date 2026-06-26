@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -49,4 +49,32 @@ test('block:true 但已 override → 放行（exit 0），消耗一次', () => {
 test('block:true 一个 id 多处违反 + override 一次 → 全放行（exit 0）', () => {
   const r = run(setup(blockCk, { 'A.java': 'BAD', 'B.java': 'BAD' }, ['B']));
   assert.equal(r.code, 0);
+});
+
+// ── 做完没收（stale tasks）测试 ────────────────────────────────────────────
+
+function staleRoot() {
+  const r = mkdtempSync(join(tmpdir(), 'sc-'));
+  mkdirSync(join(r, '.ai', 'tasks'), { recursive: true });
+  mkdirSync(join(r, 'docs', 'harness'), { recursive: true });
+  writeFileSync(join(r, 'docs', 'harness', 'checks.json'), JSON.stringify([]));
+  writeFileSync(join(r, '.ai', 'tasks', '2026-06-26-done.md'), '---\nstatus: active\ntitle: 收口我\n---\n- [x] 一\n');
+  return r;
+}
+
+test('做完没收 → exit 2 + 驱动 archive', () => {
+  const r = run(staleRoot());
+  assert.equal(r.code, 2);
+  assert.match(r.err, /做完没收/);
+  assert.match(r.err, /收口我/);
+  assert.match(r.err, /archive/);
+});
+
+test('已 override 的做完没收 → 放行(exit 0) 且消耗 override', () => {
+  const r2 = staleRoot();
+  writeFileSync(join(r2, '.ai', '.harness-override.json'), JSON.stringify({ ids: ['2026-06-26-done.md'], log: [] }));
+  const r = run(r2);
+  assert.equal(r.code, 0);
+  const o = JSON.parse(readFileSync(join(r2, '.ai', '.harness-override.json'), 'utf8'));
+  assert.equal(o.ids.includes('2026-06-26-done.md'), false);
 });
