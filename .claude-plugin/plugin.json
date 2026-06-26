@@ -1,6 +1,6 @@
 {
   "name": "gq-code-harness",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "AI 自我进化引擎：踩过的坑变成硬性检查，hook 在真实改动上拦截；单文件任务生命周期（建/归档/沉淀 + 收工自维护）；/init 铺底工作流",
   "author": { "name": "lidanyang" }
 }

@@ -8,8 +8,11 @@ export const meta = {
   ],
 }
 
-const projectRoot = args && args.projectRoot;
-const units = (args && args.units) || [];
+// args 可能以对象或 JSON 字符串到达（不同触发路径），统一归一为对象
+let A = args || {};
+if (typeof A === 'string') { try { A = JSON.parse(A); } catch { A = {}; } }
+const projectRoot = A.projectRoot;
+const units = A.units || [];
 
 const SURVEY_SCHEMA = {
   type: 'object',
