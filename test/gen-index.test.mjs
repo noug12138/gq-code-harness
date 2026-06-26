@@ -44,3 +44,21 @@ test('regenerateAll：只动带 marker 的 index.md', () => {
   assert.match(readFileSync(join(root, 'docs', 'sub', 'index.md'), 'utf8'), /文档A/);
   assert.equal(readFileSync(join(root, 'docs', 'index.md'), 'utf8'), '# 手写无标记');
 });
+
+test('tasks：未知/缺失 status → 进"其它"组，不丢', () => {
+  const d = mkdtempSync(join(tmpdir(), 'gi-'));
+  writeFileSync(join(d, 'x.md'), '---\nstatus: weird\ntitle: 怪状态\n---');
+  writeFileSync(join(d, 'y.md'), '---\ntitle: 没状态\n---');
+  const out = regenerate('<!-- gq-index:start kind=tasks -->\n\n<!-- gq-index:end -->', d);
+  assert.match(out, /其它（2）/);
+  assert.match(out, /- \[怪状态\]\(x\.md\)/);
+  assert.match(out, /- \[没状态\]\(y\.md\)/);
+});
+
+test('幂等：连跑两次输出一致', () => {
+  const d = mkdtempSync(join(tmpdir(), 'gi-'));
+  writeFileSync(join(d, 'a.md'), '---\ntitle: 甲\n---');
+  const once = regenerate('pre\n<!-- gq-index:start kind=docs -->\nX\n<!-- gq-index:end -->\npost', d);
+  const twice = regenerate(once, d);
+  assert.equal(twice, once);
+});
