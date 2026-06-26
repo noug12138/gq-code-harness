@@ -30,7 +30,7 @@ test('active 且 checklist 全勾 → 报做完没收', () => {
 
 test('active 但有未勾 → 不报', () => {
   const r = root();
-  task(r, '2026-06-26-b.md', '---\nstatus: active\ntitle: B\n---\n- [x] 一\n- [ ] 二\n');
+  task(r, '2026-06-26-b.md', '---\nstatus: active\ntitle: B\n---\n## 步骤\n- [x] 一\n- [ ] 二\n');
   const out = findStaleTasks(r);
   assert.equal(out.activeCount, 1);
   assert.equal(out.doneNotArchived.length, 0);
@@ -60,10 +60,21 @@ test('index.md 跳过', () => {
 
 test('多 active 文件混合 → activeCount 累加、只报全勾的', () => {
   const r = root();
-  task(r, '2026-06-26-e.md', '---\nstatus: active\ntitle: 全勾E\n---\n- [x] 一\n');
-  task(r, '2026-06-26-f.md', '---\nstatus: active\ntitle: 半勾F\n---\n- [x] 一\n- [ ] 二\n');
+  task(r, '2026-06-26-e.md', '---\nstatus: active\ntitle: 全勾E\n---\n## 步骤\n- [x] 一\n');
+  task(r, '2026-06-26-f.md', '---\nstatus: active\ntitle: 半勾F\n---\n## 步骤\n- [x] 一\n- [ ] 二\n');
   const out = findStaleTasks(r);
   assert.equal(out.activeCount, 2);
   assert.equal(out.doneNotArchived.length, 1);
   assert.equal(out.doneNotArchived[0].title, '全勾E');
+});
+
+test('真实模板：步骤全勾 + 收尾沉淀未勾 → 仍报做完没收', () => {
+  const r = root();
+  task(r, '2026-06-26-tmpl.md',
+    '---\nstatus: active\ntitle: 模板形\n---\n' +
+    '## 步骤\n- [x] 一\n- [x] 二\n\n' +
+    '## 收尾沉淀（done 前必跑）\n- [ ] 模块结构 → docs/architecture/\n- [ ] 业务规则 → docs/product/\n');
+  const out = findStaleTasks(r);
+  assert.equal(out.doneNotArchived.length, 1);
+  assert.equal(out.doneNotArchived[0].title, '模板形');
 });

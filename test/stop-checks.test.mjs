@@ -58,7 +58,7 @@ function staleRoot() {
   mkdirSync(join(r, '.ai', 'tasks'), { recursive: true });
   mkdirSync(join(r, 'docs', 'harness'), { recursive: true });
   writeFileSync(join(r, 'docs', 'harness', 'checks.json'), JSON.stringify([]));
-  writeFileSync(join(r, '.ai', 'tasks', '2026-06-26-done.md'), '---\nstatus: active\ntitle: 收口我\n---\n- [x] 一\n');
+  writeFileSync(join(r, '.ai', 'tasks', '2026-06-26-done.md'), '---\nstatus: active\ntitle: 收口我\n---\n## 步骤\n- [x] 一\n');
   return r;
 }
 
@@ -86,7 +86,7 @@ test('代码违反 + 做完没收 同时 → exit 2，两段都在', () => {
   mkdirSync(join(root, 'src'), { recursive: true });
   writeFileSync(join(root, 'src', 'A.java'), 'BAD');
   mkdirSync(join(root, '.ai', 'tasks'), { recursive: true });
-  writeFileSync(join(root, '.ai', 'tasks', '2026-06-26-combo.md'), '---\nstatus: active\ntitle: 合并测试\n---\n- [x] 一\n');
+  writeFileSync(join(root, '.ai', 'tasks', '2026-06-26-combo.md'), '---\nstatus: active\ntitle: 合并测试\n---\n## 步骤\n- [x] 一\n');
   const { code, err: stderr } = run(root);
   assert.equal(code, 2);
   assert.match(stderr, /违反硬性检查/);
