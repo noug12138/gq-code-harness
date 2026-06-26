@@ -57,3 +57,13 @@ test('index.md 跳过', () => {
   const out = findStaleTasks(r);
   assert.equal(out.activeCount, 0);
 });
+
+test('多 active 文件混合 → activeCount 累加、只报全勾的', () => {
+  const r = root();
+  task(r, '2026-06-26-e.md', '---\nstatus: active\ntitle: 全勾E\n---\n- [x] 一\n');
+  task(r, '2026-06-26-f.md', '---\nstatus: active\ntitle: 半勾F\n---\n- [x] 一\n- [ ] 二\n');
+  const out = findStaleTasks(r);
+  assert.equal(out.activeCount, 2);
+  assert.equal(out.doneNotArchived.length, 1);
+  assert.equal(out.doneNotArchived[0].title, '全勾E');
+});
