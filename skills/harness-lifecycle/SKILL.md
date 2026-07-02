@@ -9,6 +9,7 @@ description: gq-code-harness 任务生命周期方法论——单文件任务 + 
 
 ## 建
 - `/gq-code-harness:new-task <name>` → 从 `.ai/templates/task.md` 生成 `.ai/tasks/YYYY-MM-DD-<name>.md`，`status: active`。
+- Codex 中使用 `$gq-new-task` 执行同等流程。
 - 先与用户对齐「目标 / 范围 / 步骤」再落笔，不留占位。
 - 更新 `.ai/session.md` 指向本任务。
 
@@ -18,10 +19,12 @@ description: gq-code-harness 任务生命周期方法论——单文件任务 + 
 
 ## 归档（翻字段，不搬目录）
 - `/gq-code-harness:archive` → **先沉淀扫描**，再把 `status` 翻成 `done` / `cancelled`，**文件原地不动**。
+- Codex 中使用 `$gq-archive`；单独沉淀使用 `$gq-distill`。
 - 步骤全勾、无未尽事项 → 默认 `done`，不必追问；cancelled 必填 `cancel_reason`。
 
 ## 沉淀（黄金法则：长期结论必须进 docs/）
 - `/gq-code-harness:distill` → 按「收尾沉淀」五类判断提炼到 docs/ 对应分区，双向标记来源。
+- Codex 中使用 `$gq-distill`。
 
 ## 防退化（机器把关，不靠自觉）
 - 收工（Stop）`stop-checks` 扫 `tasks/`：**active 但步骤全勾** → exit 2 拦住结束、驱动 agent 跑 `/archive` 收口（这就是"agent 自维护"）。

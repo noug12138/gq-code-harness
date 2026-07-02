@@ -6,7 +6,7 @@ description: 给项目一键铺底（确定性骨架 + 多 agent 测绘起草，
 先定位本插件目录：用 Glob 找 `**/gq-code-harness/**/bin/scaffold.mjs`，取其上两级目录，下文记作 `<PLUGIN>`。
 
 ## 1. 铺骨架（确定性，不用 agent）
-跑 `node "<PLUGIN>/bin/scaffold.mjs" --project "<目标项目根>"`。它把 `.ai/`、`docs/` 骨架复制过去，**已存在的文件自动跳过**。把返回的 created/skipped 简报给用户。
+跑 `node "<PLUGIN>/bin/scaffold.mjs" --project "<目标项目根>"`。它把根 `AGENTS.md` / `CLAUDE.md`、`.ai/`、`docs/` 骨架复制过去，**已存在的文件自动跳过**。把返回的 created/skipped 简报给用户。
 
 ## 2. 探测子系统（确定性 + 判断）
 用 Glob 找子系统/子仓：`**/package.json`、`**/pom.xml`、形如 `**/yudao-module-*` 的模块目录、`front`/`*-qywx` 等子仓。整理成测绘单元数组 `units = [{name, path, kind}]`（path 用绝对路径）。**合并/取舍到 10–16 个**：太细就按模块或子仓粒度合并，太粗（<3）就拆到模块级。把 units 列给用户看一眼。

@@ -32,6 +32,44 @@ test('Edit 干净内容 → 放行（空输出）', () => {
   assert.equal(out.trim(), '');
 });
 
+test('Codex apply_patch 新增文件命中 forbid → deny', () => {
+  const patch = `*** Begin Patch
+*** Add File: src/Foo.java
++class Foo { // TODO 请修改
++}
+*** End Patch
+`;
+  const out = run(setup(CK), { tool_name: 'apply_patch', tool_input: { command: patch } });
+  const r = JSON.parse(out);
+  assert.equal(r.hookSpecificOutput.permissionDecision, 'deny');
+  assert.match(r.hookSpecificOutput.permissionDecisionReason, /NO-TODO/);
+});
+
+test('Codex apply_patch 更新文件时检查更新后的全文', () => {
+  const root = setup(CK);
+  mkdirSync(join(root, 'src'), { recursive: true });
+  writeFileSync(join(root, 'src', 'Foo.java'), 'class Foo {\n}\n');
+  const patch = `*** Begin Patch
+*** Update File: src/Foo.java
+@@
+ class Foo {
++  // TODO 请修改
+ }
+*** End Patch
+`;
+  const out = run(root, { tool_name: 'apply_patch', tool_input: { command: patch } });
+  const r = JSON.parse(out);
+  assert.equal(r.hookSpecificOutput.permissionDecision, 'deny');
+  assert.match(r.hookSpecificOutput.permissionDecisionReason, /NO-TODO/);
+});
+
+test('Codex Bash 写入受检文件 → deny 并要求改用 apply_patch', () => {
+  const out = run(setup(CK), { tool_name: 'Bash', tool_input: { command: 'echo bad > src/Foo.java' } });
+  const r = JSON.parse(out);
+  assert.equal(r.hookSpecificOutput.permissionDecision, 'deny');
+  assert.match(r.hookSpecificOutput.permissionDecisionReason, /apply_patch/);
+});
+
 test('glob 不匹配（.ts）→ 放行', () => {
   const out = run(setup(CK), { tool_name: 'Write', tool_input: { file_path: 'D:/x/Foo.ts', content: 'TODO 请修改' } });
   assert.equal(out.trim(), '');

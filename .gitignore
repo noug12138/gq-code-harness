@@ -1,5 +1,6 @@
 node_modules/
 .claude/
+.codex-marketplace-install.json
 
 # /init 铺底（scaffold）若误铺进本插件仓，这些产物不入库
 # 注意：docs/architecture.* 是真实流程图文件（不是目录），不在此列

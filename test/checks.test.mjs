@@ -30,3 +30,10 @@ test('loadChecks: 读 docs/harness/checks.json；不存在则空数组', () => {
   writeFileSync(join(root, 'docs', 'harness', 'checks.json'), JSON.stringify([{ id: 'A', globs: ['**/*'], kind: 'forbid', pattern: 'x', reason: 'r' }]));
   assert.equal(loadChecks(root).length, 1);
 });
+
+test('loadChecks: 兼容 UTF-8 BOM', () => {
+  const root = mkdtempSync(join(tmpdir(), 'ck-'));
+  mkdirSync(join(root, 'docs', 'harness'), { recursive: true });
+  writeFileSync(join(root, 'docs', 'harness', 'checks.json'), '\uFEFF' + JSON.stringify([{ id: 'B', globs: ['**/*'], kind: 'forbid', pattern: 'x', reason: 'r' }]));
+  assert.equal(loadChecks(root)[0].id, 'B');
+});

@@ -1,0 +1,38 @@
+{
+  "name": "gq-code-harness",
+  "version": "0.6.0+codex.20260702065120",
+  "description": "Engineering harness for Codex and Claude Code: project checks, lifecycle hooks, single-file task flow, bootstrap drafting, and index maintenance.",
+  "author": {
+    "name": "lidanyang",
+    "url": "https://github.com/noug12138"
+  },
+  "homepage": "https://github.com/noug12138/gq-code-harness",
+  "repository": "https://github.com/noug12138/gq-code-harness",
+  "keywords": [
+    "codex",
+    "claude-code",
+    "hooks",
+    "skills",
+    "engineering"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "gq-code-harness",
+    "shortDescription": "Hard checks and task lifecycle guardrails for coding agents.",
+    "longDescription": "Adds Codex-native skill entrypoints while preserving the existing Claude Code plugin layout. Includes project scaffolding, task lifecycle commands, contract checks, override flow, and lifecycle hooks.",
+    "developerName": "lidanyang",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write",
+      "Interactive"
+    ],
+    "websiteURL": "https://github.com/noug12138/gq-code-harness",
+    "defaultPrompt": [
+      "Use gq-code-harness to create a task.",
+      "Use gq-code-harness to archive completed work.",
+      "Use gq-code-harness to bootstrap this repo."
+    ],
+    "brandColor": "#2563EB"
+  }
+}

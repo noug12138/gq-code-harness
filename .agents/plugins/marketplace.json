@@ -1,0 +1,20 @@
+{
+  "name": "gq-harness-marketplace",
+  "interface": {
+    "displayName": "gq Harness Marketplace"
+  },
+  "plugins": [
+    {
+      "name": "gq-code-harness",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
